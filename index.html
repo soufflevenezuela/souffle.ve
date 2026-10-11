@@ -15,10 +15,10 @@
 
     <!-- === CONFIGURACIÓN DE TUS DATOS === -->
     <script>
-        // 1. URL DE GOOGLE APPS SCRIPT
+        // URL DE GOOGLE APPS SCRIPT
         const API_URL = "https://script.google.com/macros/s/AKfycbzukNs5x0ohnZ3mSD8YIaZILFtdo-hgZ3utYswJ64uxznXWq48qd_A-_wmhJsMgIc5Q/exec"; 
         
-        // 2. NÚMERO DE WHATSAPP (Asegúrate de colocar tu número real con código de país, p. ej. 584241234567)
+        // NÚMERO DE WHATSAPP
         const TELEFONO_WHATSAPP = "584241234567";
     </script>
 
@@ -111,7 +111,7 @@
 
     </main>
 
-    <!-- JAVASCRIPT LÓGICO -->
+    <!-- JAVASCRIPT LÓGICO Y ROBUSTO -->
     <script>
         let productosData = [];
         let tasaBCV = 0;
@@ -120,14 +120,173 @@
         // Configurar botón general de WhatsApp
         document.getElementById('btn-whatsapp-general').href = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent('¡Hola Soufflé VE! Quisiera hacer una consulta sobre los productos disponibles.')}`;
 
-        // Cargar los datos desde Google Sheets
+        // Extraer imagen limpia aceptando BBCode, HTML o texto
+        function obtenerUrlImagenLimpia(prod) {
+            let urlRaw = '';
+            for (let key in prod) {
+                if (key.toLowerCase().includes('imagen') || key.toLowerCase().includes('imagnen')) {
+                    urlRaw = prod[key];
+                    break;
+                }
+            }
+            if (!urlRaw) return 'https://via.placeholder.com/400x400?text=Sin+Imagen';
+
+            // Si viene con etiquetas BBCode [url=...][img]https://...[/img][/url]
+            const matchImg = String(urlRaw).match(/[img](.*?)\[\/img\]/i);
+            if (matchImg && matchImg[1]) return matchImg[1].trim();
+
+            const matchUrl = String(urlRaw).match(/\[url=(.*?)\]/i);
+            if (matchUrl && matchUrl[1]) return matchUrl[1].trim();
+
+            const matchSrc = String(urlRaw).match(/src=["'](.*?)["']/i);
+            if (matchSrc && matchSrc[1]) return matchSrc[1].trim();
+
+            return String(urlRaw).replace(/\[\/?(url\vert{}img).*?\]/gi, '').trim();
+        }
+
+        // Cargar datos con respaldo contra bloqueos CORS/Redirección
         async function cargarDatos() {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL, { method: 'GET', redirect: 'follow' });
                 const data = await response.json();
                 
-                tasaBCV = data.tasa_bcv || 0;
+                tasaBCV = Number(data.tasa_bcv || data.tasa || 0);
                 productosData = data.productos || [];
 
-                // Mostrar tasa BCV
-                document.getElementById('t
+                document.getElementById('tasa-bcv-display').innerText = `Bs. ${tasaBCV.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+                renderizarFiltrosMarcas();
+                renderizarProductos(productosData);
+
+            } catch (error) {
+                console.error("Error al cargar los productos:", error);
+                document.getElementById('contador-productos').innerText = "No se pudieron cargar los productos. Por favor reintenta en un momento.";
+                document.getElementById('tasa-bcv-display').innerText = "N/D";
+            }
+        }
+
+        function renderizarFiltrosMarcas() {
+            const marcas = ['todas', ...new Set(productosData.map(p => p.marca).filter(Boolean))];
+            const contenedor = document.getElementById('contenedor-marcas');
+            
+            contenedor.innerHTML = marcas.map(marca => {
+                const esTodas = marca === 'todas';
+                const nombreMostrar = esTodas ? 'Todas las Marcas' : marca;
+                const claseActiva = esTodas ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200';
+                
+                return `
+                    <button onclick="filtrarMarca('${marca}', this)" class="btn-filtro ${claseActiva} text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
+                        ${nombreMostrar}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function filtrarMarca(marcaSeleccionada, elemento) {
+            marcaSeleccionadaActual = marcaSeleccionada;
+
+            document.querySelectorAll('.btn-filtro').forEach(btn => {
+                btn.className = 'btn-filtro bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
+            });
+
+            if (elemento) {
+                elemento.className = 'btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
+            } else {
+                const primerBoton = document.querySelector('.btn-filtro');
+                if (primerBoton) primerBoton.className = 'btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
+            }
+
+            aplicarFiltrosYBusqueda();
+        }
+
+        function aplicarFiltrosYBusqueda() {
+            const textoBusqueda = document.getElementById('input-busqueda').value.toLowerCase().trim();
+            const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+
+            if (textoBusqueda.length > 0) {
+                btnLimpiar.classList.remove('hidden');
+            } else {
+                btnLimpiar.classList.add('hidden');
+            }
+
+            const resultado = productosData.filter(prod => {
+                const coincideMarca = marcaSeleccionadaActual === 'todas' || 
+                                     (prod.marca && prod.marca.toLowerCase() === marcaSeleccionadaActual.toLowerCase());
+
+                const nombre = prod.nombre ? prod.nombre.toLowerCase() : '';
+                const marca = prod.marca ? prod.marca.toLowerCase() : '';
+                
+                const coincideTexto = nombre.includes(textoBusqueda) || marca.includes(textoBusqueda);
+
+                return coincideMarca && coincideTexto;
+            });
+
+            renderizarProductos(resultado);
+        }
+
+        function limpiarBusqueda() {
+            document.getElementById('input-busqueda').value = '';
+            aplicarFiltrosYBusqueda();
+        }
+
+        function renderizarProductos(lista) {
+            const grilla = document.getElementById('grilla-productos');
+            const contador = document.getElementById('contador-productos');
+
+            contador.innerText = `${lista.length} modelo(s) disponible(s)`;
+
+            if (lista.length === 0) {
+                grilla.innerHTML = `<p class="col-span-full text-center text-gray-500 py-12">No se encontraron productos que coincidan con tu búsqueda.</p>`;
+                return;
+            }
+
+            grilla.innerHTML = lista.map(prod => {
+                const precioUsd = Number(prod.precio_usd) || 0;
+                const precioBs = precioUsd * Number(tasaBCV);
+                const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const imagenFinal = obtenerUrlImagenLimpia(prod);
+                const mensajeWS = `Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* (Marca: ${prod.marca}, Tallas: ${prod.tallas}, Precio: $${precioUsd} / Bs. ${precioBsFormateado})`;
+                const urlWS = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensajeWS)}`;
+
+                return `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
+                        <div>
+                            <div class="h-64 bg-white overflow-hidden relative border-b border-gray-50 flex items-center justify-center p-3">
+                                <img src="${imagenFinal}" alt="${prod.nombre}" class="max-h-full max-w-full object-contain">
+                                ${prod.destacado ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm">🔥 Destacado</span>` : ''}
+                            </div>
+                            <div class="p-4">
+                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.marca || 'GENÉRICO'}</span>
+                                <h3 class="font-bold text-gray-900 text-base leading-snug mb-2">${prod.nombre || 'Producto'}</h3>
+                                <div class="mb-4">
+                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-md">
+                                        Tallas: ${prod.tallas || 'Única'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 pt-0 border-t border-gray-50 mt-auto">
+                            <div class="flex justify-between items-end my-3">
+                                <div>
+                                    <span class="text-2xl font-black text-gray-900">$${precioUsd}</span>
+                                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Tasa BCV</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-bold text-gray-700 block">Bs. ${precioBsFormateado}</span>
+                                </div>
+                            </div>
+                            <a href="${urlWS}" target="_blank" class="w-full bg-black hover:bg-gray-800 text-white font-bold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 transition duration-200">
+                                <span>Pedir por WhatsApp</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cargar datos al iniciar
+        cargarDatos();
+    </script>
+</body>
+</html>
