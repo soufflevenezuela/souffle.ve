@@ -132,7 +132,6 @@
             }
             if (!urlRaw) return 'https://via.placeholder.com/400x400?text=Sin+Imagen';
 
-            // Si viene con etiquetas BBCode [url=...][img]https://...[/img][/url]
             const matchImg = String(urlRaw).match(/[img](.*?)\[\/img\]/i);
             if (matchImg && matchImg[1]) return matchImg[1].trim();
 
@@ -230,6 +229,25 @@
             aplicarFiltrosYBusqueda();
         }
 
+        // Función para enviar pedido con TALLA SELECCIONADA + FOTO
+        function enviarPedidoWhatsApp(idx) {
+            const prod = productosData[idx];
+            if (!prod) return;
+
+            const selectorTalla = document.getElementById(`select-talla-${idx}`);
+            const tallaSeleccionada = selectorTalla ? selectorTalla.value : 'No especificada';
+
+            const precioUsd = Number(prod.precio_usd) || 0;
+            const precioBs = precioUsd * Number(tasaBCV);
+            const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const imagenFinal = obtenerUrlImagenLimpia(prod);
+
+            const mensajeWS = `¡Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* | Marca: ${prod.marca || 'N/A'} | Talla seleccionada: ${tallaSeleccionada} | Precio: $${precioUsd} / Bs. ${precioBsFormateado} | Foto del producto: ${imagenFinal}`;
+
+            const urlWS = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensajeWS)}`;
+            window.open(urlWS, '_blank');
+        }
+
         function renderizarProductos(lista) {
             const grilla = document.getElementById('grilla-productos');
             const contador = document.getElementById('contador-productos');
@@ -241,13 +259,14 @@
                 return;
             }
 
-            grilla.innerHTML = lista.map(prod => {
+            grilla.innerHTML = lista.map((prod, index) => {
                 const precioUsd = Number(prod.precio_usd) || 0;
                 const precioBs = precioUsd * Number(tasaBCV);
                 const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const imagenFinal = obtenerUrlImagenLimpia(prod);
-                const mensajeWS = `Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* (Marca: ${prod.marca}, Tallas: ${prod.tallas}, Precio: $${precioUsd} / Bs. ${precioBsFormateado})`;
-                const urlWS = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensajeWS)}`;
+
+                // Separar tallas por comas si vienen en Google Sheets (ej: "30, 32, 34" o "S, M, L")
+                const listaTallas = prod.tallas ? String(prod.tallas).split(',').map(t => t.trim()).filter(Boolean) : ['Única'];
 
                 return `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
@@ -258,11 +277,16 @@
                             </div>
                             <div class="p-4">
                                 <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.marca || 'GENÉRICO'}</span>
-                                <h3 class="font-bold text-gray-900 text-base leading-snug mb-2">${prod.nombre || 'Producto'}</h3>
+                                <h3 class="font-bold text-gray-900 text-base leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
+                                
+                                <!-- SELECTOR DE TALLA INTERACTIVO -->
                                 <div class="mb-4">
-                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-md">
-                                        Tallas: ${prod.tallas || 'Única'}
-                                    </span>
+                                    <label for="select-talla-${index}" class="block text-[11px] font-bold text-gray-500 uppercase mb-1">
+                                        Selecciona tu Talla:
+                                    </label>
+                                    <select id="select-talla-${index}" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-xs rounded-lg p-2 font-semibold focus:ring-2 focus:ring-black focus:border-transparent outline-none">
+                                        ${listaTallas.map(talla => `<option value="${talla}">Talla: ${talla}</option>`).join('')}
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -277,9 +301,9 @@
                                     <span class="text-sm font-bold text-gray-700 block">Bs. ${precioBsFormateado}</span>
                                 </div>
                             </div>
-                            <a href="${urlWS}" target="_blank" class="w-full bg-black hover:bg-gray-800 text-white font-bold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 transition duration-200">
+                            <button onclick="enviarPedidoWhatsApp(${index})" class="w-full bg-black hover:bg-gray-800 text-white font-bold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 transition duration-200">
                                 <span>Pedir por WhatsApp</span>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 `;
