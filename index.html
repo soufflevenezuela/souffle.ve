@@ -144,13 +144,35 @@
             return String(urlRaw).replace(/\[\/?(url\vert{}img).*?\]/gi, '').trim();
         }
 
-        // Obtener array de fotos ordenadas por la estructura de columnas
+      // Obtener array de fotos escaneando de forma inteligente todas las columnas
         function obtenerArrayFotos(prod) {
             let fotos = [];
             
-            // 1. Buscar explícitamente imagen 1, 2 y 3 por orden común de columnas
-            const llavesPosibles = ['imagen_url', 'imagen', 'img', 'foto', 'imagen_2_url', 'imagen2', 'img2', 'foto2', 'imagen_3_url', 'imagen3', 'img3', 'foto3'];
+            // Recorrer todas las columnas que vienen de Google Sheets
+            for (let key in prod) {
+                let valor = prod[key];
+                if (valor) {
+                    let limpia = limpiarUrlUnica(valor);
+                    // Si el valor es una URL válida que empieza por http o https
+                    if (limpia && limpia.startsWith('http') && !fotos.includes(limpia)) {
+                        const kLower = key.toLowerCase();
+                        // Evitar tomar celdas que sean textos informativos, precios o tallas
+                        if (!kLower.includes('precio') && !kLower.includes('talla') && !kLower.includes('id') && !kLower.includes('marca') && !kLower.includes('nombre') && !kLower.includes('destacado')) {
+                            
+                            // Priorizar la foto principal al inicio del arreglo
+                            if (kLower.includes('imagen_url') || kLower === 'imagen' || kLower === 'foto') {
+                                fotos.unshift(limpia);
+                            } else {
+                                fotos.push(limpia);
+                            }
+                        }
+                    }
+                }
+            }
             
+            if (fotos.length === 0) fotos.push('https://via.placeholder.com/400x400?text=Sin+Imagen');
+            return fotos;
+        }      
             // Recorrer primero buscando coincidencias exactas ordenadas
             for (let kBase of llavesPosibles) {
                 for (let key in prod) {
