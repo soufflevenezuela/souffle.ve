@@ -144,22 +144,36 @@
             return String(urlRaw).replace(/\[\/?(url\vert{}img).*?\]/gi, '').trim();
         }
 
-        // Obtener array de hasta 3 fotos del producto desde Google Sheets
+        // Obtener array de fotos ordenadas por la estructura de columnas
         function obtenerArrayFotos(prod) {
             let fotos = [];
-            for (let key in prod) {
-                const k = key.toLowerCase();
-                if (k.includes('imagen') || k.includes('imagnen') || k.includes('foto')) {
-                    const limpia = limpiarUrlUnica(prod[key]);
-                    if (limpia && !fotos.includes(limpia)) {
-                        if (k === 'imagen_url' || k === 'imagen') {
-                            fotos.unshift(limpia);
-                        } else {
+            
+            // 1. Buscar explícitamente imagen 1, 2 y 3 por orden común de columnas
+            const llavesPosibles = ['imagen_url', 'imagen', 'img', 'foto', 'imagen_2_url', 'imagen2', 'img2', 'foto2', 'imagen_3_url', 'imagen3', 'img3', 'foto3'];
+            
+            // Recorrer primero buscando coincidencias exactas ordenadas
+            for (let kBase of llavesPosibles) {
+                for (let key in prod) {
+                    if (key.toLowerCase().trim() === kBase) {
+                        const limpia = limpiarUrlUnica(prod[key]);
+                        if (limpia && !fotos.includes(limpia)) {
                             fotos.push(limpia);
                         }
                     }
                 }
             }
+
+            // 2. Si faltaron por capturar, buscar cualquier otra columna que tenga contenido de imagen
+            for (let key in prod) {
+                const k = key.toLowerCase();
+                if (k.includes('imagen') || k.includes('imagnen') || k.includes('foto') || k.includes('img')) {
+                    const limpia = limpiarUrlUnica(prod[key]);
+                    if (limpia && !fotos.includes(limpia)) {
+                        fotos.push(limpia);
+                    }
+                }
+            }
+
             if (fotos.length === 0) fotos.push('https://via.placeholder.com/400x400?text=Sin+Imagen');
             return fotos;
         }
@@ -330,7 +344,7 @@
                                 ${fotos.length > 1 ? `
                                     <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
                                         ${fotos.map((f, fIdx) => `
-                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', this)" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition">
+                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', this)" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition" title="Ver foto ${fIdx + 1}">
                                                 ${fIdx + 1}
                                             </button>
                                         `).join('')}
