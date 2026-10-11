@@ -112,6 +112,14 @@
 
     </main>
 
+    <!-- VENTANA MODAL PARA ZOOM / VISTA PREVIA AMPLIADA -->
+    <div id="modal-zoom" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4">
+        <button onclick="cerrarZoom()" class="absolute top-5 right-5 text-white bg-white/25 hover:bg-white/40 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition">✕</button>
+        <div class="max-w-4xl max-h-[90vh] overflow-hidden flex items-center justify-center">
+            <img id="imagen-zoom-src" src="" alt="Vista ampliada" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+        </div>
+    </div>
+
     <!-- JAVASCRIPT LÓGICO Y ROBUSTO -->
     <script>
         let productosData = [];
@@ -121,17 +129,9 @@
         // Configurar botón general de WhatsApp
         document.getElementById('btn-whatsapp-general').href = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent('¡Hola Soufflé VE! Quisiera hacer una consulta sobre los productos disponibles.')}`;
 
-        // Extraer imagen limpia aceptando BBCode, HTML o texto
-        function obtenerUrlImagenLimpia(prod) {
-            let urlRaw = '';
-            for (let key in prod) {
-                if (key.toLowerCase().includes('imagen') || key.toLowerCase().includes('imagnen')) {
-                    urlRaw = prod[key];
-                    break;
-                }
-            }
-            if (!urlRaw) return 'https://via.placeholder.com/400x400?text=Sin+Imagen';
-
+        // Limpiar URL de imagen individual
+        function limpiarUrlUnica(urlRaw) {
+            if (!urlRaw) return '';
             const matchImg = String(urlRaw).match(/[img](.*?)\[\/img\]/i);
             if (matchImg && matchImg[1]) return matchImg[1].trim();
 
@@ -142,6 +142,26 @@
             if (matchSrc && matchSrc[1]) return matchSrc[1].trim();
 
             return String(urlRaw).replace(/\[\/?(url\vert{}img).*?\]/gi, '').trim();
+        }
+
+        // Obtener array de hasta 3 fotos del producto desde Google Sheets
+        function obtenerArrayFotos(prod) {
+            let fotos = [];
+            for (let key in prod) {
+                const k = key.toLowerCase();
+                if (k.includes('imagen') || k.includes('imagnen') || k.includes('foto')) {
+                    const limpia = limpiarUrlUnica(prod[key]);
+                    if (limpia && !fotos.includes(limpia)) {
+                        if (k === 'imagen_url' || k === 'imagen') {
+                            fotos.unshift(limpia);
+                        } else {
+                            fotos.push(limpia);
+                        }
+                    }
+                }
+            }
+            if (fotos.length === 0) fotos.push('https://via.placeholder.com/400x400?text=Sin+Imagen');
+            return fotos;
         }
 
         // Cargar datos con respaldo contra bloqueos CORS/Redirección
@@ -229,7 +249,34 @@
             aplicarFiltrosYBusqueda();
         }
 
-        // Función para enviar pedido con TALLA SELECCIONADA + FOTO
+        // Cambiar foto activa en la tarjeta mediante los botones numéricos
+        function cambiarFoto(prodIndex, fotoUrl, btnElement) {
+            const imgElement = document.getElementById(`img-prod-${prodIndex}`);
+            if (imgElement) imgElement.src = fotoUrl;
+
+            const contenedorBotones = document.getElementById(`botones-fotos-${prodIndex}`);
+            if (contenedorBotones) {
+                Array.from(contenedorBotones.children).forEach(btn => {
+                    btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition";
+                });
+                btnElement.className = "w-7 h-7 rounded-lg text-xs font-bold border border-black bg-black text-white shadow-sm transition";
+            }
+        }
+
+        // Abrir Zoom / Vista Previa Ampliada
+        function abrirZoom(prodIndex) {
+            const imgElement = document.getElementById(`img-prod-${prodIndex}`);
+            if (!imgElement) return;
+
+            document.getElementById('imagen-zoom-src').src = imgElement.src;
+            document.getElementById('modal-zoom').classList.remove('hidden');
+        }
+
+        function cerrarZoom() {
+            document.getElementById('modal-zoom').classList.add('hidden');
+        }
+
+        // Función para enviar pedido con TALLA SELECCIONADA + FOTO ACTIVA
         function enviarPedidoWhatsApp(idx) {
             const prod = productosData[idx];
             if (!prod) return;
@@ -237,12 +284,14 @@
             const selectorTalla = document.getElementById(`select-talla-${idx}`);
             const tallaSeleccionada = selectorTalla ? selectorTalla.value : 'No especificada';
 
+            const imgElement = document.getElementById(`img-prod-${idx}`);
+            const fotoActivaUrl = imgElement ? imgElement.src : obtenerArrayFotos(prod)[0];
+
             const precioUsd = Number(prod.precio_usd) || 0;
             const precioBs = precioUsd * Number(tasaBCV);
             const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const imagenFinal = obtenerUrlImagenLimpia(prod);
 
-            const mensajeWS = `¡Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* | Marca: ${prod.marca || 'N/A'} | Talla seleccionada: ${tallaSeleccionada} | Precio: $${precioUsd} / Bs. ${precioBsFormateado} | Foto del producto: ${imagenFinal}`;
+            const mensajeWS = `¡Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* | Marca: ${prod.marca || 'N/A'} | Talla seleccionada: ${tallaSeleccionada} | Precio: $${precioUsd} / Bs. ${precioBsFormateado} | Foto del producto: ${fotoActivaUrl}`;
 
             const urlWS = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensajeWS)}`;
             window.open(urlWS, '_blank');
@@ -263,18 +312,32 @@
                 const precioUsd = Number(prod.precio_usd) || 0;
                 const precioBs = precioUsd * Number(tasaBCV);
                 const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                const imagenFinal = obtenerUrlImagenLimpia(prod);
-
-                // Separar tallas por comas si vienen en Google Sheets (ej: "30, 32, 34" o "S, M, L")
+                const fotos = obtenerArrayFotos(prod);
                 const listaTallas = prod.tallas ? String(prod.tallas).split(',').map(t => t.trim()).filter(Boolean) : ['Única'];
 
                 return `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
                         <div>
-                            <div class="h-64 bg-white overflow-hidden relative border-b border-gray-50 flex items-center justify-center p-3">
-                                <img src="${imagenFinal}" alt="${prod.nombre}" class="max-h-full max-w-full object-contain">
-                                ${prod.destacado ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm">🔥 Destacado</span>` : ''}
+                            <!-- CONTENEDOR DE FOTO CON ZOOM Y BOTONES DE ÁNGULO -->
+                            <div class="relative bg-white border-b border-gray-50">
+                                <div class="h-64 overflow-hidden flex items-center justify-center p-3 cursor-pointer group" onclick="abrirZoom(${index})" title="Haz clic para ampliar">
+                                    <img id="img-prod-${index}" src="${fotos[0]}" alt="${prod.nombre}" class="max-h-full max-w-full object-contain transition transform group-hover:scale-105 duration-200">
+                                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition">🔍 Zoom</span>
+                                </div>
+                                ${prod.destacado ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm pointer-events-none">🔥 Destacado</span>` : ''}
+                                
+                                <!-- BOTONES SELECTORES DE FOTOS (FRENTE, ESPALDA, ETC.) -->
+                                ${fotos.length > 1 ? `
+                                    <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
+                                        ${fotos.map((f, fIdx) => `
+                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', this)" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition">
+                                                ${fIdx + 1}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
                             </div>
+
                             <div class="p-4">
                                 <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.marca || 'GENÉRICO'}</span>
                                 <h3 class="font-bold text-gray-900 text-base leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
