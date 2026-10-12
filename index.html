@@ -256,6 +256,23 @@
             aplicarFiltrosYBusqueda();
         }
 
+        // Seleccionar talla mediante botones interactivos (pills)
+        function seleccionarTalla(prodIndex, talla, btnElement) {
+            const contenedorTallas = document.getElementById(`botones-tallas-${prodIndex}`);
+            if (contenedorTallas) {
+                Array.from(contenedorTallas.children).forEach(btn => {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition";
+                });
+            }
+            btnElement.className = "px-3 py-1.5 rounded-lg text-xs font-bold border border-black bg-black text-white shadow-sm transition";
+            
+            // Guardar la talla seleccionada en un atributo temporal de la tarjeta
+            const cardElement = document.getElementById(`card-prod-${prodIndex}`);
+            if (cardElement) {
+                cardElement.setAttribute('data-talla-seleccionada', talla);
+            }
+        }
+
         // Cambiar foto activa en la tarjeta mediante los botones numéricos o el swipe
         function cambiarFoto(prodIndex, fotoUrl, indiceFoto) {
             const imgElement = document.getElementById(`img-prod-${prodIndex}`);
@@ -332,8 +349,8 @@
             const prod = productosData[idx];
             if (!prod) return;
 
-            const selectorTalla = document.getElementById(`select-talla-${idx}`);
-            const tallaSeleccionada = selectorTalla ? selectorTalla.value : 'No especificada';
+            const cardElement = document.getElementById(`card-prod-${idx}`);
+            const tallaSeleccionada = cardElement ? cardElement.getAttribute('data-talla-seleccionada') : 'No especificada';
 
             const imgElement = document.getElementById(`img-prod-${idx}`);
             const fotoActivaUrl = imgElement ? imgElement.src : obtenerArrayFotos(prod)[0];
@@ -365,11 +382,12 @@
                 const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const fotos = obtenerArrayFotos(prod);
                 const listaTallas = prod.tallas ? String(prod.tallas).split(',').map(t => t.trim()).filter(Boolean) : ['Única'];
+                const tallaPorDefecto = listaTallas[0];
 
                 setTimeout(() => configurarSwipe(index, fotos), 50);
 
                 return `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
+                    <div id="card-prod-${index}" data-talla-seleccionada="${tallaPorDefecto}" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
                         <div>
                             <!-- CONTENEDOR DE FOTO CON ZOOM, SWIPE Y BOTONES DE ÁNGULO -->
                             <div class="relative bg-white border-b border-gray-50">
@@ -395,14 +413,18 @@
                                 <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.categoria || 'GENERAL'} • ${prod.marca || 'GENÉRICO'}</span>
                                 <h3 class="font-bold text-gray-900 text-base leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
                                 
-                                <!-- SELECTOR DE TALLA INTERACTIVO -->
+                                <!-- SELECTOR DE TALLA INTERACTIVO CON BOTONES (PILLS) -->
                                 <div class="mb-4">
-                                    <label for="select-talla-${index}" class="block text-[11px] font-bold text-gray-500 uppercase mb-1">
+                                    <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1.5">
                                         Selecciona tu Talla:
                                     </label>
-                                    <select id="select-talla-${index}" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-xs rounded-lg p-2 font-semibold focus:ring-2 focus:ring-black focus:border-transparent outline-none">
-                                        ${listaTallas.map(talla => `<option value="${talla}">Talla: ${talla}</option>`).join('')}
-                                    </select>
+                                    <div id="botones-tallas-${index}" class="flex flex-wrap gap-1.5">
+                                        ${listaTallas.map((talla, tIdx) => `
+                                            <button onclick="seleccionarTalla(${index}, '${talla}', this)" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${tIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition">
+                                                ${talla}
+                                            </button>
+                                        `).join('')}
+                                    </div>
                                 </div>
                             </div>
                         </div>
