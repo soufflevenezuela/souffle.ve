@@ -255,18 +255,65 @@
             aplicarFiltrosYBusqueda();
         }
 
-        // Cambiar foto activa en la tarjeta mediante los botones numéricos
-        function cambiarFoto(prodIndex, fotoUrl, btnElement) {
+        // Cambiar foto activa en la tarjeta mediante los botones numéricos o el swipe
+        function cambiarFoto(prodIndex, fotoUrl, indiceFoto) {
             const imgElement = document.getElementById(`img-prod-${prodIndex}`);
             if (imgElement) imgElement.src = fotoUrl;
 
+            // Actualizar atributo visual de índice actual en el elemento imagen para el swipe
+            if (imgElement) imgElement.setAttribute('data-current-foto', indiceFoto);
+
             const contenedorBotones = document.getElementById(`botones-fotos-${prodIndex}`);
             if (contenedorBotones) {
-                Array.from(contenedorBotones.children).forEach(btn => {
-                    btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition";
+                Array.from(contenedorBotones.children).forEach((btn, idx) => {
+                    if (idx === indiceFoto) {
+                        btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-black bg-black text-white shadow-sm transition";
+                    } else {
+                        btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition";
+                    }
                 });
-                btnElement.className = "w-7 h-7 rounded-lg text-xs font-bold border border-black bg-black text-white shadow-sm transition";
             }
+        }
+
+        // Configuración de gestos táctiles (Swipe Horizontal) para las fotos
+        function configurarSwipe(prodIndex, fotos) {
+            if (fotos.length <= 1) return;
+            const contenedorImg = document.getElementById(`contenedor-img-${prodIndex}`);
+            if (!contenedorImg) return;
+
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            contenedorImg.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            contenedorImg.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                manejarSwipe(prodIndex, fotos, touchStartX, touchEndX);
+            }, { passive: true });
+        }
+
+        function manejarSwipe(prodIndex, fotos, startX, endX) {
+            const umbralMinimo = 40; // Distancia mínima en píxeles para reconocer el gesto
+            const diferencia = startX - endX;
+
+            if (Math.abs(diferencia) < umbralMinimo) return;
+
+            const imgElement = document.getElementById(`img-prod-${prodIndex}`);
+            if (!imgElement) return;
+
+            let indiceActual = parseInt(imgElement.getAttribute('data-current-foto') || '0', 10);
+
+            if (diferencia > 0) {
+                // Swipe hacia la IZQUIERDA (Siguiente foto)
+                indiceActual = (indiceActual + 1) % fotos.length;
+            } else {
+                // Swipe hacia la DERECHA (Foto anterior)
+                indiceActual = (indiceActual - 1 + fotos.length) % fotos.length;
+            }
+
+            cambiarFoto(prodIndex, fotos[indiceActual], indiceActual);
         }
 
         // Abrir Zoom / Vista Previa Ampliada
@@ -321,14 +368,17 @@
                 const fotos = obtenerArrayFotos(prod);
                 const listaTallas = prod.tallas ? String(prod.tallas).split(',').map(t => t.trim()).filter(Boolean) : ['Única'];
 
+                // Programar el swipe después de renderizar el producto
+                setTimeout(() => configurarSwipe(index, fotos), 50);
+
                 return `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
                         <div>
-                            <!-- CONTENEDOR DE FOTO CON ZOOM Y BOTONES DE ÁNGULO -->
+                            <!-- CONTENEDOR DE FOTO CON ZOOM, SWIPE Y BOTONES DE ÁNGULO -->
                             <div class="relative bg-white border-b border-gray-50">
-                                <div class="h-64 overflow-hidden flex items-center justify-center p-3 cursor-pointer group" onclick="abrirZoom(${index})" title="Haz clic para ampliar">
-                                    <img id="img-prod-${index}" src="${fotos[0]}" alt="${prod.nombre}" class="max-h-full max-w-full object-contain transition transform group-hover:scale-105 duration-200">
-                                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition">🔍 Zoom</span>
+                                <div id="contenedor-img-${index}" class="h-64 overflow-hidden flex items-center justify-center p-3 cursor-pointer group touch-pan-y" onclick="abrirZoom(${index})" title="Haz clic para ampliar">
+                                    <img id="img-prod-${index}" src="${fotos[0]}" data-current-foto="0" alt="${prod.nombre}" class="max-h-full max-w-full object-contain transition transform group-hover:scale-105 duration-200 select-none">
+                                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition pointer-events-none">🔍 Zoom</span>
                                 </div>
                                 ${prod.destacado ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm pointer-events-none">🔥 Destacado</span>` : ''}
                                 
@@ -336,7 +386,7 @@
                                 ${fotos.length > 1 ? `
                                     <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
                                         ${fotos.map((f, fIdx) => `
-                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', this)" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition" title="Ver foto ${fIdx + 1}">
+                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', ${fIdx})" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition" title="Ver foto ${fIdx + 1}">
                                                 ${fIdx + 1}
                                             </button>
                                         `).join('')}
