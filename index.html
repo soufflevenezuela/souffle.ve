@@ -72,7 +72,7 @@
                     type="text" 
                     id="input-busqueda" 
                     oninput="aplicarFiltrosYBusqueda()"
-                    placeholder="Buscar producto o marca..." 
+                    placeholder="Buscar producto, marca o categoría..." 
                     class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition shadow-sm"
                 >
                 <button 
@@ -84,14 +84,14 @@
                 </button>
             </div>
 
-            <!-- FILTRO POR MARCA -->
+            <!-- FILTRO POR CATEGORÍA -->
             <div>
                 <div class="mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Filtrar por Marca:</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Filtrar por Categoría:</span>
                 </div>
-                <div id="contenedor-marcas" class="flex flex-wrap gap-2">
-                    <button onclick="filtrarMarca('todas')" class="btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
-                        Todas las Marcas
+                <div id="contenedor-categorias" class="flex flex-wrap gap-2">
+                    <button onclick="filtrarCategoria('todas')" class="btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
+                        Todas las Categorías
                     </button>
                 </div>
             </div>
@@ -124,7 +124,7 @@
     <script>
         let productosData = [];
         let tasaBCV = 0;
-        let marcaSeleccionadaActual = 'todas';
+        let categoriaSeleccionadaActual = 'todas';
 
         // Configurar botón general de WhatsApp
         document.getElementById('btn-whatsapp-general').href = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent('¡Hola Soufflé VE! Quisiera hacer una consulta sobre los productos disponibles.')}`;
@@ -154,7 +154,7 @@
                     let limpia = limpiarUrlUnica(valor);
                     if (limpia && limpia.startsWith('http') && !fotos.includes(limpia)) {
                         const kLower = key.toLowerCase();
-                        if (!kLower.includes('precio') && !kLower.includes('talla') && !kLower.includes('id') && !kLower.includes('marca') && !kLower.includes('nombre') && !kLower.includes('destacado')) {
+                        if (!kLower.includes('precio') && !kLower.includes('talla') && !kLower.includes('id') && !kLower.includes('marca') && !kLower.includes('categoria') && !kLower.includes('nombre') && !kLower.includes('destacado')) {
                             
                             if (kLower.includes('imagen_url') || kLower === 'imagen' || kLower === 'foto') {
                                 fotos.unshift(limpia);
@@ -181,7 +181,7 @@
 
                 document.getElementById('tasa-bcv-display').innerText = `Bs. ${tasaBCV.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-                renderizarFiltrosMarcas();
+                renderizarFiltrosCategorias();
                 renderizarProductos(productosData);
 
             } catch (error) {
@@ -191,25 +191,25 @@
             }
         }
 
-        function renderizarFiltrosMarcas() {
-            const marcas = ['todas', ...new Set(productosData.map(p => p.marca).filter(Boolean))];
-            const contenedor = document.getElementById('contenedor-marcas');
+        function renderizarFiltrosCategorias() {
+            const categorias = ['todas', ...new Set(productosData.map(p => p.categoria).filter(Boolean))];
+            const contenedor = document.getElementById('contenedor-categorias');
             
-            contenedor.innerHTML = marcas.map(marca => {
-                const esTodas = marca === 'todas';
-                const nombreMostrar = esTodas ? 'Todas las Marcas' : marca;
+            contenedor.innerHTML = categorias.map(cat => {
+                const esTodas = cat === 'todas';
+                const nombreMostrar = esTodas ? 'Todas las Categorías' : cat;
                 const claseActiva = esTodas ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200';
                 
                 return `
-                    <button onclick="filtrarMarca('${marca}', this)" class="btn-filtro ${claseActiva} text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
+                    <button onclick="filtrarCategoria('${cat}', this)" class="btn-filtro ${claseActiva} text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
                         ${nombreMostrar}
                     </button>
                 `;
             }).join('');
         }
 
-        function filtrarMarca(marcaSeleccionada, elemento) {
-            marcaSeleccionadaActual = marcaSeleccionada;
+        function filtrarCategoria(catSeleccionada, elemento) {
+            categoriaSeleccionadaActual = catSeleccionada;
 
             document.querySelectorAll('.btn-filtro').forEach(btn => {
                 btn.className = 'btn-filtro bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
@@ -236,15 +236,16 @@
             }
 
             const resultado = productosData.filter(prod => {
-                const coincideMarca = marcaSeleccionadaActual === 'todas' || 
-                                     (prod.marca && prod.marca.toLowerCase() === marcaSeleccionadaActual.toLowerCase());
+                const coincideCat = categoriaSeleccionadaActual === 'todas' || 
+                                     (prod.categoria && prod.categoria.toLowerCase() === categoriaSeleccionadaActual.toLowerCase());
 
                 const nombre = prod.nombre ? prod.nombre.toLowerCase() : '';
                 const marca = prod.marca ? prod.marca.toLowerCase() : '';
+                const categoria = prod.categoria ? prod.categoria.toLowerCase() : '';
                 
-                const coincideTexto = nombre.includes(textoBusqueda) || marca.includes(textoBusqueda);
+                const coincideTexto = nombre.includes(textoBusqueda) || marca.includes(textoBusqueda) || categoria.includes(textoBusqueda);
 
-                return coincideMarca && coincideTexto;
+                return coincideCat && coincideTexto;
             });
 
             renderizarProductos(resultado);
@@ -260,7 +261,6 @@
             const imgElement = document.getElementById(`img-prod-${prodIndex}`);
             if (imgElement) imgElement.src = fotoUrl;
 
-            // Actualizar atributo visual de índice actual en el elemento imagen para el swipe
             if (imgElement) imgElement.setAttribute('data-current-foto', indiceFoto);
 
             const contenedorBotones = document.getElementById(`botones-fotos-${prodIndex}`);
@@ -295,7 +295,7 @@
         }
 
         function manejarSwipe(prodIndex, fotos, startX, endX) {
-            const umbralMinimo = 40; // Distancia mínima en píxeles para reconocer el gesto
+            const umbralMinimo = 40;
             const diferencia = startX - endX;
 
             if (Math.abs(diferencia) < umbralMinimo) return;
@@ -306,10 +306,8 @@
             let indiceActual = parseInt(imgElement.getAttribute('data-current-foto') || '0', 10);
 
             if (diferencia > 0) {
-                // Swipe hacia la IZQUIERDA (Siguiente foto)
                 indiceActual = (indiceActual + 1) % fotos.length;
             } else {
-                // Swipe hacia la DERECHA (Foto anterior)
                 indiceActual = (indiceActual - 1 + fotos.length) % fotos.length;
             }
 
@@ -344,7 +342,7 @@
             const precioBs = precioUsd * Number(tasaBCV);
             const precioBsFormateado = precioBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            const mensajeWS = `¡Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* | Marca: ${prod.marca || 'N/A'} | Talla seleccionada: ${tallaSeleccionada} | Precio: $${precioUsd} / Bs. ${precioBsFormateado} | Foto del producto: ${fotoActivaUrl}`;
+            const mensajeWS = `¡Hola Soufflé VE! Me interesa comprar el modelo: *${prod.nombre}* | Categoría: ${prod.categoria || 'N/A'} | Marca: ${prod.marca || 'N/A'} | Talla seleccionada: ${tallaSeleccionada} | Precio: $${precioUsd} / Bs. ${precioBsFormateado} | Foto del producto: ${fotoActivaUrl}`;
 
             const urlWS = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensajeWS)}`;
             window.open(urlWS, '_blank');
@@ -368,7 +366,6 @@
                 const fotos = obtenerArrayFotos(prod);
                 const listaTallas = prod.tallas ? String(prod.tallas).split(',').map(t => t.trim()).filter(Boolean) : ['Única'];
 
-                // Programar el swipe después de renderizar el producto
                 setTimeout(() => configurarSwipe(index, fotos), 50);
 
                 return `
@@ -382,7 +379,7 @@
                                 </div>
                                 ${prod.destacado ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm pointer-events-none">🔥 Destacado</span>` : ''}
                                 
-                                <!-- BOTONES SELECTORES DE FOTOS (FRENTE, ESPALDA, ETC.) -->
+                                <!-- BOTONES SELECTORES DE FOTOS -->
                                 ${fotos.length > 1 ? `
                                     <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
                                         ${fotos.map((f, fIdx) => `
@@ -395,7 +392,7 @@
                             </div>
 
                             <div class="p-4">
-                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.marca || 'GENÉRICO'}</span>
+                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.categoria || 'GENERAL'} • ${prod.marca || 'GENÉRICO'}</span>
                                 <h3 class="font-bold text-gray-900 text-base leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
                                 
                                 <!-- SELECTOR DE TALLA INTERACTIVO -->
