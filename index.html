@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soufflé VE - Tienda Online</title>
+    <title>Soufflé VE - Catálogo 2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Fuentes Elegantes Estilo Catálogo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F7F4EF; /* Fondo crema cálido inspirado en el catálogo[cite: 1, 2] */
+            color: #4A3B32;
+        }
+        .font-brand {
+            font-family: 'Cormorant Garamond', serif;
+        }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 antialiased">
+<body class="antialiased">
 
     <!-- === CONFIGURACIÓN DE TUS DATOS === -->
     <script>
@@ -23,33 +31,34 @@
     </script>
 
     <!-- BARRA SUPERIOR DE NOTIFICACIÓN -->
-    <div class="bg-black text-white text-xs sm:text-sm py-2.5 px-4 flex flex-col sm:flex-row justify-between items-center gap-1 border-b border-gray-800">
+    <div class="bg-[#3D2E25] text-[#F7F4EF] text-xs sm:text-sm py-2 px-4 flex flex-col sm:flex-row justify-between items-center gap-1 border-b border-[#524034]">
         <div>
-            <span>Pedidos directos por <strong class="text-green-400">WhatsApp</strong> | Envíos a todo el país</span>
+            <span>Pedidos directos por <strong class="text-[#D4A373]">WhatsApp</strong> | Envíos a todo el país</span>
         </div>
         <div class="flex items-center gap-2">
-            <span>Tasa Oficial BCV: <strong id="tasa-bcv-display" class="text-yellow-400">Cargando...</strong></span>
+            <span>Tasa Oficial BCV: <strong id="tasa-bcv-display" class="text-[#E9D8A6]">Cargando...</strong></span>
             <span>•</span>
             <span>Pagos en Bs. y Divisas</span>
         </div>
     </div>
 
     <!-- ENCABEZADO PRINCIPAL (SOUFFLÉ VE) -->
-    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header class="bg-[#F7F4EF] shadow-sm sticky top-0 z-50 border-b border-[#E6E0D5]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <a href="#" class="flex items-center gap-3">
                 <!-- LOGO DE LA TIENDA -->
-                <div class="w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-gray-200 flex items-center justify-center bg-white">
+                <div class="w-11 h-11 rounded-xl overflow-hidden shadow-sm border border-[#D5CCD4] flex items-center justify-center bg-white">
                     <img src="https://i.ibb.co/3yyfhSTj/logo.jpg" alt="Soufflé VE Logo" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <span class="font-black text-xl text-black tracking-tight block leading-none">SOUFFLÉ <span class="text-xs bg-black text-white px-1.5 py-0.5 rounded ml-0.5 font-bold tracking-normal">VE</span></span>
-                    <span class="text-[10px] text-gray-400 uppercase tracking-widest font-extrabold block mt-0.5">Showroom & Footwear</span>
+                    <!-- Tipografía Serif idéntica al estilo del catálogo[cite: 1, 2] -->
+                    <span class="font-brand text-3xl font-bold tracking-wider text-[#4A3B32] block leading-none">soufflé</span>
+                    <span class="text-[9px] text-[#8C7A6B] uppercase tracking-widest font-semibold block mt-1">Catálogo 2026 • Colección Exclusiva[cite: 2]</span>
                 </div>
             </a>
 
             <div class="flex items-center gap-3">
-                <a id="btn-whatsapp-general" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-full flex items-center gap-2 transition duration-200 shadow-sm">
+                <a id="btn-whatsapp-general" href="#" target="_blank" class="bg-[#4A3B32] hover:bg-[#3D2E25] text-white font-medium text-xs sm:text-sm py-2.5 px-5 rounded-full flex items-center gap-2 transition duration-200 shadow-sm">
                     <span>WhatsApp</span>
                 </a>
             </div>
@@ -57,14 +66,14 @@
     </header>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         <!-- SECCIÓN DE BÚSQUEDA Y FILTROS -->
         <section class="mb-8 space-y-4">
             <!-- BARRA DE BÚSQUEDA EN TIEMPO REAL -->
             <div class="relative max-w-md w-full">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5 text-[#8C7A6B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
@@ -73,12 +82,12 @@
                     id="input-busqueda" 
                     oninput="aplicarFiltrosYBusqueda()"
                     placeholder="Buscar producto, marca o categoría..." 
-                    class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition shadow-sm"
+                    class="block w-full pl-10 pr-10 py-3 border border-[#D5CCD4] rounded-2xl bg-white text-sm text-[#4A3B32] placeholder-[#8C7A6B] focus:outline-none focus:ring-2 focus:ring-[#4A3B32] focus:border-transparent transition shadow-sm"
                 >
                 <button 
                     id="btn-limpiar-busqueda" 
                     onclick="limpiarBusqueda()" 
-                    class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-sm font-bold"
+                    class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-[#8C7A6B] hover:text-[#4A3B32] text-sm font-bold"
                 >
                     ✕
                 </button>
@@ -87,10 +96,10 @@
             <!-- FILTRO POR CATEGORÍA -->
             <div>
                 <div class="mb-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Filtrar por Categoría:</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-[#8C7A6B]">Filtrar por Categoría:</span>
                 </div>
                 <div id="contenedor-categorias" class="flex flex-wrap gap-2">
-                    <button onclick="filtrarCategoria('todas')" class="btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
+                    <button onclick="filtrarCategoria('todas')" class="btn-filtro bg-[#4A3B32] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
                         Todas las Categorías
                     </button>
                 </div>
@@ -98,10 +107,10 @@
         </section>
 
         <!-- CABECERA DEL CATÁLOGO -->
-        <div class="flex justify-between items-end mb-6">
+        <div class="flex justify-between items-end mb-8 border-b border-[#E6E0D5] pb-4">
             <div>
-                <h2 class="text-2xl font-black text-gray-900 tracking-tight">Catálogo Disponible</h2>
-                <p id="contador-productos" class="text-sm text-gray-500 font-medium">Cargando productos...</p>
+                <h2 class="font-brand text-3xl font-bold text-[#4A3B32] tracking-tight">Prendas Disponibles[cite: 2]</h2>
+                <p id="contador-productos" class="text-sm text-[#8C7A6B] font-medium">Cargando colección...</p>
             </div>
         </div>
 
@@ -127,7 +136,7 @@
         let categoriaSeleccionadaActual = 'todas';
 
         // Configurar botón general de WhatsApp
-        document.getElementById('btn-whatsapp-general').href = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent('¡Hola Soufflé VE! Quisiera hacer una consulta sobre los productos disponibles.')}`;
+        document.getElementById('btn-whatsapp-general').href = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent('¡Hola Soufflé VE! Quisiera hacer una consulta sobre la colección disponible.')}`;
 
         // Limpiar URL de imagen individual
         function limpiarUrlUnica(urlRaw) {
@@ -198,7 +207,7 @@
             contenedor.innerHTML = categorias.map(cat => {
                 const esTodas = cat === 'todas';
                 const nombreMostrar = esTodas ? 'Todas las Categorías' : cat;
-                const claseActiva = esTodas ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200';
+                const claseActiva = esTodas ? 'bg-[#4A3B32] text-white' : 'bg-white text-[#4A3B32] hover:bg-[#F2ECE4] border border-[#D5CCD4]';
                 
                 return `
                     <button onclick="filtrarCategoria('${cat}', this)" class="btn-filtro ${claseActiva} text-xs font-bold px-4 py-2 rounded-full shadow-sm transition">
@@ -212,14 +221,14 @@
             categoriaSeleccionadaActual = catSeleccionada;
 
             document.querySelectorAll('.btn-filtro').forEach(btn => {
-                btn.className = 'btn-filtro bg-white text-gray-700 hover:bg-gray-100 border border-gray-200 text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
+                btn.className = 'btn-filtro bg-white text-[#4A3B32] hover:bg-[#F2ECE4] border border-[#D5CCD4] text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
             });
 
             if (elemento) {
-                elemento.className = 'btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
+                elemento.className = 'btn-filtro bg-[#4A3B32] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
             } else {
                 const primerBoton = document.querySelector('.btn-filtro');
-                if (primerBoton) primerBoton.className = 'btn-filtro bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
+                if (primerBoton) primerBoton.className = 'btn-filtro bg-[#4A3B32] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm transition';
             }
 
             aplicarFiltrosYBusqueda();
@@ -261,12 +270,11 @@
             const contenedorTallas = document.getElementById(`botones-tallas-${prodIndex}`);
             if (contenedorTallas) {
                 Array.from(contenedorTallas.children).forEach(btn => {
-                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition";
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold border border-[#D5CCD4] bg-white text-[#4A3B32] hover:bg-[#F2ECE4] transition";
                 });
             }
-            btnElement.className = "px-3 py-1.5 rounded-lg text-xs font-bold border border-black bg-black text-white shadow-sm transition";
+            btnElement.className = "px-3 py-1.5 rounded-lg text-xs font-bold border border-[#4A3B32] bg-[#4A3B32] text-white shadow-sm transition";
             
-            // Guardar la talla seleccionada en un atributo temporal de la tarjeta
             const cardElement = document.getElementById(`card-prod-${prodIndex}`);
             if (cardElement) {
                 cardElement.setAttribute('data-talla-seleccionada', talla);
@@ -284,9 +292,9 @@
             if (contenedorBotones) {
                 Array.from(contenedorBotones.children).forEach((btn, idx) => {
                     if (idx === indiceFoto) {
-                        btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-black bg-black text-white shadow-sm transition";
+                        btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-[#4A3B32] bg-[#4A3B32] text-white shadow-sm transition";
                     } else {
-                        btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition";
+                        btn.className = "w-7 h-7 rounded-lg text-xs font-bold border border-[#D5CCD4] bg-white text-[#4A3B32] hover:bg-[#F2ECE4] transition";
                     }
                 });
             }
@@ -372,7 +380,7 @@
             contador.innerText = `${lista.length} modelo(s) disponible(s)`;
 
             if (lista.length === 0) {
-                grilla.innerHTML = `<p class="col-span-full text-center text-gray-500 py-12">No se encontraron productos que coincidan con tu búsqueda.</p>`;
+                grilla.innerHTML = `<p class="col-span-full text-center text-[#8C7A6B] py-12">No se encontraron productos que coincidan con tu búsqueda.</p>`;
                 return;
             }
 
@@ -387,21 +395,21 @@
                 setTimeout(() => configurarSwipe(index, fotos), 50);
 
                 return `
-                    <div id="card-prod-${index}" data-talla-seleccionada="${tallaPorDefecto}" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
+                    <div id="card-prod-${index}" data-talla-seleccionada="${tallaPorDefecto}" class="bg-white rounded-2xl shadow-sm border border-[#E6E0D5] overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
                         <div>
                             <!-- CONTENEDOR DE FOTO CON ZOOM, SWIPE Y BOTONES DE ÁNGULO -->
-                            <div class="relative bg-white border-b border-gray-50">
+                            <div class="relative bg-white border-b border-[#F2ECE4]">
                                 <div id="contenedor-img-${index}" class="h-64 overflow-hidden flex items-center justify-center p-3 cursor-pointer group touch-pan-y" onclick="abrirZoom(${index})" title="Haz clic para ampliar">
                                     <img id="img-prod-${index}" src="${fotos[0]}" data-current-foto="0" alt="${prod.nombre}" class="max-h-full max-w-full object-contain transition transform group-hover:scale-105 duration-200 select-none">
-                                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition pointer-events-none">🔍 Zoom</span>
+                                    <span class="absolute bottom-2 right-2 bg-[#4A3B32]/80 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition pointer-events-none">🔍 Zoom</span>
                                 </div>
-                                ${prod.destacado ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm pointer-events-none">🔥 Destacado</span>` : ''}
+                                ${prod.destacado ? `<span class="absolute top-3 left-3 bg-[#8C7A6B] text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm pointer-events-none">🔥 Destacado</span>` : ''}
                                 
                                 <!-- BOTONES SELECTORES DE FOTOS -->
                                 ${fotos.length > 1 ? `
-                                    <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-200">
+                                    <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-[#D5CCD4]">
                                         ${fotos.map((f, fIdx) => `
-                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', ${fIdx})" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition" title="Ver foto ${fIdx + 1}">
+                                            <button onclick="event.stopPropagation(); cambiarFoto(${index}, '${f}', ${fIdx})" class="w-7 h-7 rounded-lg text-xs font-bold border ${fIdx === 0 ? 'border-[#4A3B32] bg-[#4A3B32] text-white shadow-sm' : 'border-[#D5CCD4] bg-white text-[#4A3B32] hover:bg-[#F2ECE4]'} transition" title="Ver foto ${fIdx + 1}">
                                                 ${fIdx + 1}
                                             </button>
                                         `).join('')}
@@ -410,17 +418,17 @@
                             </div>
 
                             <div class="p-4">
-                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-wider block mb-1">${prod.categoria || 'GENERAL'} • ${prod.marca || 'GENÉRICO'}</span>
-                                <h3 class="font-bold text-gray-900 text-base leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
+                                <span class="text-[10px] font-bold uppercase text-[#8C7A6B] tracking-wider block mb-1">${prod.categoria || 'GENERAL'} • ${prod.marca || 'GENÉRICO'}</span>
+                                <h3 class="font-brand font-bold text-[#4A3B32] text-xl leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
                                 
                                 <!-- SELECTOR DE TALLA INTERACTIVO CON BOTONES (PILLS) -->
                                 <div class="mb-4">
-                                    <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1.5">
+                                    <label class="block text-[11px] font-bold text-[#8C7A6B] uppercase mb-1.5">
                                         Selecciona tu Talla:
                                     </label>
                                     <div id="botones-tallas-${index}" class="flex flex-wrap gap-1.5">
                                         ${listaTallas.map((talla, tIdx) => `
-                                            <button onclick="seleccionarTalla(${index}, '${talla}', this)" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${tIdx === 0 ? 'border-black bg-black text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'} transition">
+                                            <button onclick="seleccionarTalla(${index}, '${talla}', this)" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${tIdx === 0 ? 'border-[#4A3B32] bg-[#4A3B32] text-white shadow-sm' : 'border-[#D5CCD4] bg-white text-[#4A3B32] hover:bg-[#F2ECE4]'} transition">
                                                 ${talla}
                                             </button>
                                         `).join('')}
@@ -429,17 +437,17 @@
                             </div>
                         </div>
 
-                        <div class="p-4 pt-0 border-t border-gray-50 mt-auto">
+                        <div class="p-4 pt-0 border-t border-[#F2ECE4] mt-auto">
                             <div class="flex justify-between items-end my-3">
                                 <div>
-                                    <span class="text-2xl font-black text-gray-900">$${precioUsd}</span>
-                                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Tasa BCV</span>
+                                    <span class="text-2xl font-black text-[#4A3B32]">$${precioUsd}</span>
+                                    <span class="text-[10px] text-[#8C7A6B] uppercase font-bold block">Tasa BCV</span>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-sm font-bold text-gray-700 block">Bs. ${precioBsFormateado}</span>
+                                    <span class="text-sm font-bold text-[#6B5A4E] block">Bs. ${precioBsFormateado}</span>
                                 </div>
                             </div>
-                            <button onclick="enviarPedidoWhatsApp(${index})" class="w-full bg-black hover:bg-gray-800 text-white font-bold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 transition duration-200">
+                            <button onclick="enviarPedidoWhatsApp(${index})" class="w-full bg-[#4A3B32] hover:bg-[#3D2E25] text-white font-bold text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 transition duration-200">
                                 <span>Pedir por WhatsApp</span>
                             </button>
                         </div>
