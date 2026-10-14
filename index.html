@@ -11,7 +11,7 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #F7F4EF; /* Tono crema cálido del catálogo */
+            background-color: #F7F4EF;
             color: #4A3B32;
         }
         .font-brand {
@@ -23,10 +23,7 @@
 
     <!-- === CONFIGURACIÓN DE TUS DATOS === -->
     <script>
-        // URL DE GOOGLE APPS SCRIPT
         const API_URL = "https://script.google.com/macros/s/AKfycbzukNs5x0ohnZ3mSD8YIaZILFtdo-hgZ3utYswJ64uxznXWq48qd_A-_wmhJsMgIc5Q/exec"; 
-        
-        // NÚMERO DE WHATSAPP
         const TELEFONO_WHATSAPP = "584243566603";
     </script>
 
@@ -42,17 +39,16 @@
         </div>
     </div>
 
-    <!-- ENCABEZADO PRINCIPAL (SOUFFLÉ VE) -->
+    <!-- ENCABEZADO PRINCIPAL -->
     <header class="bg-[#F7F4EF] shadow-sm sticky top-0 z-50 border-b border-[#E6E0D5]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <a href="#" class="flex items-center gap-3">
-                <!-- LOGO DE LA TIENDA -->
                 <div class="w-11 h-11 rounded-xl overflow-hidden shadow-sm border border-[#D5CCD4] flex items-center justify-center bg-white">
                     <img src="https://i.ibb.co/3yyfhSTj/logo.jpg" alt="Soufflé VE Logo" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <span class="font-brand text-3xl font-bold tracking-wider text-[#4A3B32] block leading-none">soufflé</span>
-                    <span class="text-[9px] text-[#8C7A6B] uppercase tracking-widest font-semibold block mt-1">Catálogo 2026 • Colección Exclusiva[cite: 2]</span>
+                    <span class="text-[9px] text-[#8C7A6B] uppercase tracking-widest font-semibold block mt-1">Catálogo • Colección Exclusiva</span>
                 </div>
             </a>
 
@@ -69,7 +65,6 @@
         
         <!-- SECCIÓN DE BÚSQUEDA Y FILTROS -->
         <section class="mb-8 space-y-4">
-            <!-- BARRA DE BÚSQUEDA EN TIEMPO REAL -->
             <div class="relative max-w-md w-full">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-[#8C7A6B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,7 +87,6 @@
                 </button>
             </div>
 
-            <!-- FILTRO POR CATEGORÍA -->
             <div>
                 <div class="mb-2">
                     <span class="text-xs font-bold uppercase tracking-wider text-[#8C7A6B]">Filtrar por Categoría:</span>
@@ -108,7 +102,7 @@
         <!-- CABECERA DEL CATÁLOGO -->
         <div class="flex justify-between items-end mb-8 border-b border-[#E6E0D5] pb-4">
             <div>
-                <h2 class="font-brand text-3xl font-bold text-[#4A3B32] tracking-tight">Prendas Disponibles[cite: 2]</h2>
+                <h2 class="font-brand text-3xl font-bold text-[#4A3B32] tracking-tight">Prendas Disponibles</h2>
                 <p id="contador-productos" class="text-sm text-[#8C7A6B] font-medium">Cargando colección...</p>
             </div>
         </div>
@@ -120,7 +114,7 @@
 
     </main>
 
-    <!-- VENTANA MODAL PARA ZOOM / VISTA PREVIA AMPLIADA -->
+    <!-- VENTANA MODAL PARA ZOOM -->
     <div id="modal-zoom" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4">
         <button onclick="cerrarZoom()" class="absolute top-5 right-5 text-white bg-white/25 hover:bg-white/40 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition">✕</button>
         <div class="max-w-4xl max-h-[90vh] overflow-hidden flex items-center justify-center">
@@ -128,16 +122,14 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LÓGICO Y ROBUSTO -->
+    <!-- JAVASCRIPT -->
     <script>
         let productosData = [];
         let tasaBCV = 0;
         let categoriaSeleccionadaActual = 'todas';
 
-        // Configurar botón general de WhatsApp
         document.getElementById('btn-whatsapp-general').href = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent('¡Hola Soufflé VE! Quisiera hacer una consulta sobre la colección disponible.')}`;
 
-        // Limpiar URL de imagen individual
         function limpiarUrlUnica(urlRaw) {
             if (!urlRaw) return '';
             const matchImg = String(urlRaw).match(/[img](.*?)\[\/img\]/i);
@@ -152,10 +144,8 @@
             return String(urlRaw).replace(/\[\/?(url\vert{}img).*?\]/gi, '').trim();
         }
 
-        // Obtener array de fotos escaneando de forma inteligente todas las columnas
         function obtenerArrayFotos(prod) {
             let fotos = [];
-            
             for (let key in prod) {
                 let valor = prod[key];
                 if (valor) {
@@ -163,7 +153,6 @@
                     if (limpia && limpia.startsWith('http') && !fotos.includes(limpia)) {
                         const kLower = key.toLowerCase();
                         if (!kLower.includes('precio') && !kLower.includes('talla') && !kLower.includes('id') && !kLower.includes('marca') && !kLower.includes('categoria') && !kLower.includes('nombre') && !kLower.includes('destacado')) {
-                            
                             if (kLower.includes('imagen_url') || kLower === 'imagen' || kLower === 'foto') {
                                 fotos.unshift(limpia);
                             } else {
@@ -173,12 +162,10 @@
                     }
                 }
             }
-            
             if (fotos.length === 0) fotos.push('https://via.placeholder.com/400x400?text=Sin+Imagen');
             return fotos;
         }
 
-        // Cargar datos con respaldo contra bloqueos CORS/Redirección
         async function cargarDatos() {
             try {
                 const response = await fetch(API_URL, { method: 'GET', redirect: 'follow' });
@@ -264,7 +251,6 @@
             aplicarFiltrosYBusqueda();
         }
 
-        // Seleccionar talla mediante botones interactivos (pills)
         function seleccionarTalla(prodIndex, talla, btnElement) {
             const contenedorTallas = document.getElementById(`botones-tallas-${prodIndex}`);
             if (contenedorTallas) {
@@ -280,11 +266,9 @@
             }
         }
 
-        // Cambiar foto activa en la tarjeta mediante los botones numéricos o el swipe
         function cambiarFoto(prodIndex, fotoUrl, indiceFoto) {
             const imgElement = document.getElementById(`img-prod-${prodIndex}`);
             if (imgElement) imgElement.src = fotoUrl;
-
             if (imgElement) imgElement.setAttribute('data-current-foto', indiceFoto);
 
             const contenedorBotones = document.getElementById(`botones-fotos-${prodIndex}`);
@@ -299,7 +283,6 @@
             }
         }
 
-        // Configuración de gestos táctiles (Swipe Horizontal) para las fotos
         function configurarSwipe(prodIndex, fotos) {
             if (fotos.length <= 1) return;
             const contenedorImg = document.getElementById(`contenedor-img-${prodIndex}`);
@@ -338,7 +321,6 @@
             cambiarFoto(prodIndex, fotos[indiceActual], indiceActual);
         }
 
-        // Abrir Zoom / Vista Previa Ampliada
         function abrirZoom(prodIndex) {
             const imgElement = document.getElementById(`img-prod-${prodIndex}`);
             if (!imgElement) return;
@@ -351,7 +333,6 @@
             document.getElementById('modal-zoom').classList.add('hidden');
         }
 
-        // Función para enviar pedido con TALLA SELECCIONADA + FOTO ACTIVA
         function enviarPedidoWhatsApp(idx) {
             const prod = productosData[idx];
             if (!prod) return;
@@ -396,7 +377,6 @@
                 return `
                     <div id="card-prod-${index}" data-talla-seleccionada="${tallaPorDefecto}" class="bg-white rounded-2xl shadow-sm border border-[#E6E0D5] overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-200">
                         <div>
-                            <!-- CONTENEDOR DE FOTO CON ZOOM, SWIPE Y BOTONES DE ÁNGULO -->
                             <div class="relative bg-white border-b border-[#F2ECE4]">
                                 <div id="contenedor-img-${index}" class="h-64 overflow-hidden flex items-center justify-center p-3 cursor-pointer group touch-pan-y" onclick="abrirZoom(${index})" title="Haz clic para ampliar">
                                     <img id="img-prod-${index}" src="${fotos[0]}" data-current-foto="0" alt="${prod.nombre}" class="max-h-full max-w-full object-contain transition transform group-hover:scale-105 duration-200 select-none">
@@ -404,7 +384,6 @@
                                 </div>
                                 ${prod.destacado ? `<span class="absolute top-3 left-3 bg-[#8C7A6B] text-white text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm pointer-events-none">🔥 Destacado</span>` : ''}
                                 
-                                <!-- BOTONES SELECTORES DE FOTOS -->
                                 ${fotos.length > 1 ? `
                                     <div id="botones-fotos-${index}" class="absolute bottom-3 left-3 flex gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-[#D5CCD4]">
                                         ${fotos.map((f, fIdx) => `
@@ -420,7 +399,6 @@
                                 <span class="text-[10px] font-bold uppercase text-[#8C7A6B] tracking-wider block mb-1">${prod.categoria || 'GENERAL'} • ${prod.marca || 'GENÉRICO'}</span>
                                 <h3 class="font-brand font-bold text-[#4A3B32] text-xl leading-snug mb-3">${prod.nombre || 'Producto'}</h3>
                                 
-                                <!-- SELECTOR DE TALLA INTERACTIVO CON BOTONES (PILLS) -->
                                 <div class="mb-4">
                                     <label class="block text-[11px] font-bold text-[#8C7A6B] uppercase mb-1.5">
                                         Selecciona tu Talla:
@@ -455,7 +433,6 @@
             }).join('');
         }
 
-        // Cargar datos al iniciar
         cargarDatos();
     </script>
 </body>
